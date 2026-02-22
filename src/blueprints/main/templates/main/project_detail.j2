@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.title_ru }} | Портфолио</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Простой Lightbox CSS -->
+    <style>
+        /* Сетка для шапки: Слева картинка, справа текст */
+        .project-intro-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr; /* Картинка 300px, остальное текст */
+            gap: 40px;
+            margin-bottom: 60px;
+            align-items: start;
+        }
+
+        .project-preview-img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        /* Галерея */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 200px; /* Фиксированная высота превьюшек галереи */
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid #333;
+        }
+        .gallery-item img:hover {
+            transform: scale(1.03);
+            border-color: #555;
+        }
+
+        /* Lightbox Modal */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: #fff;
+            font-size: 40px;
+            cursor: pointer;
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            padding: 20px;
+            user-select: none;
+        }
+        .prev { left: 10px; }
+        .next { right: 10px; }
+
+        @media (max-width: 768px) {
+            .project-intro-grid {
+                grid-template-columns: 1fr; /* На мобиле в одну колонку */
+                gap: 20px;
+            }
+            .project-preview-img {
+                max-width: 100%; /* Картинка на всю ширину */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div style="margin-bottom: 40px;">
+            <a href="{{ url_for('main.index', lang='ru') }}" style="font-size: 18px; color: #666;">
+                ← Назад к портфолио
+            </a>
+        </div>
+
+        <!-- ВЕРХНИЙ БЛОК: Слева Картинка, Справа Текст -->
+        <div class="project-intro-grid">
+
+            <!-- Левая колонка: Превьюшка -->
+            <div class="intro-left">
+                {% if project.preview_image %}
+                    {% if project.preview_image.startswith('http') %}
+                        <img src="{{ project.preview_image }}" alt="Preview" class="project-preview-img">
+                    {% else %}
+                        <!-- ИСПРАВЛЕНО: Очистка пути для uploaded_file -->
+                        <img src="{{ url_for('uploaded_file', filename=project.preview_image.replace('uploads/', '').replace('static/', '')) }}"
+                             alt="Preview" class="project-preview-img">
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Правая колонка: Описание -->
+            <div class="intro-right">
+                <h1 style="margin-top: 0; font-size: 36px; margin-bottom: 20px;">{{ project.title_ru }}</h1>
+
+                <div style="font-size: 18px; color: #ccc; line-height: 1.6; white-space: pre-line;">
+                    {{ project.full_desc_ru }}
+                </div>
+
+                {% if project.technologies %}
+                <div style="margin-top: 30px;">
+                    <h4 style="color: #666; margin-bottom: 10px;">Технологии:</h4>
+                    <div style="color: #999;">
+                        {{ project.technologies }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- СРЕДНИЙ БЛОК: Видео (если есть) -->
+        {% if project.video_embed_url %}
+        <div class="mb-section" style="margin-bottom: 60px;">
+            <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Видео</h2>
+            <div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000;">
+                <iframe src="{{ project.video_embed_url }}"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                        allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- НИЖНИЙ БЛОК: Галерея -->
+        {% if project.gallery_images %}
+        <div class="gallery-section">
+            <h2 style="border-bottom: 1px solid #333; padding-bottom: 10px;">Галерея</h2>
+            <div class="gallery-grid">
+                {% for img in project.gallery_images %}
+
+                    <!-- ИСПРАВЛЕНО: Генерация правильного URL для каждой картинки -->
+                    {% set img_src = img.image_filename %}
+                    {% if not img_src.startswith('http') %}
+                        {% set img_src = url_for('uploaded_file', filename=img.image_filename.replace('uploads/', '').replace('static/', '')) %}
+                    {% endif %}
+
+                    <div class="gallery-item">
+                        <img src="{{ img_src }}"
+                             onclick="openLightbox('{{ loop.index0 }}')"
+                             data-src="{{ img_src }}"
+                             class="gallery-thumb">
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+            <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+            <div class="lightbox-nav prev" onclick="changeSlide(-1, event)">&#10094;</div>
+            <img id="lightbox-img" src="">
+            <div class="lightbox-nav next" onclick="changeSlide(1, event)">&#10095;</div>
+        </div>
+
+        <!-- Lightbox Script -->
+        <script>
+            let currentIndex = 0;
+            const images = [];
+
+            // Собираем все ссылки на картинки из галереи
+            document.addEventListener("DOMContentLoaded", function() {
+                const thumbs = document.querySelectorAll('.gallery-thumb');
+                thumbs.forEach(img => {
+                    images.push(img.getAttribute('data-src'));
+                });
+            });
+
+            function openLightbox(index) {
+                currentIndex = parseInt(index);
+                showImage(currentIndex);
+                document.getElementById('lightbox').style.display = 'flex';
+            }
+
+            function closeLightbox(e) {
+                if (e.target !== document.getElementById('lightbox-img') && !e.target.classList.contains('lightbox-nav')) {
+                    document.getElementById('lightbox').style.display = 'none';
+                }
+            }
+
+            function changeSlide(n, e) {
+                e.stopPropagation();
+                currentIndex += n;
+                if (currentIndex >= images.length) currentIndex = 0;
+                if (currentIndex < 0) currentIndex = images.length - 1;
+                showImage(currentIndex);
+            }
+
+            function showImage(index) {
+                const img = document.getElementById('lightbox-img');
+                img.src = images[index];
+            }
+
+            // Закрытие по Esc
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') document.getElementById('lightbox').style.display = 'none';
+                if (e.key === 'ArrowRight') changeSlide(1, e);
+                if (e.key === 'ArrowLeft') changeSlide(-1, e);
+            });
+        </script>
+        {% endif %}
+
+        <footer style="margin-top: 100px; margin-bottom: 40px; color: #333; font-size: 12px; text-align: center;">
+            &copy; 2025 Solomonov Stas
+        </footer>
+
+    </div>
+</body>
+</html>

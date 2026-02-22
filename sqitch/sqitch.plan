@@ -1,0 +1,9 @@
+%syntax-version=1.0.0
+%project=new_project
+%uri=sqlite://../app.db
+
+app_init 2025-11-26T17:57:37Z Miron Syrov <mironsyrovedu@gmail.com> # Initial structure
+portfolio_tables 2025-11-27T09:30:32Z Miron Syrov <mironsyrovedu@gmail.com> # Add tables for portfolio content
+alter_portfolio 2025-12-04T22:21:35Z Serge <serge@Serges-MacBook-Pro-16.local> # added missed fields
+admin_user 2025-12-04T22:29:24Z Serge <serge@Serges-MacBook-Pro-16.local> # add admin user
+projects 2025-12-05T09:18:26Z Miron Syrov <mironsyrovedu@gmail.com> # projects init

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile.full_name if profile else 'Портфолио' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- ДОБАВЛЕНО: Стили для черно-белого эффекта -->
+    <style>
+        /* По умолчанию делаем фото профиля и превью проектов черно-белыми */
+        .photo,
+        .project-preview img {
+            filter: grayscale(100%);
+            transition: filter 0.4s ease; /* Плавный переход */
+            -webkit-filter: grayscale(100%); /* Для совместимости (Safari) */
+        }
+
+        /* При наведении на фото профиля возвращаем цвет */
+        .photo:hover {
+            filter: grayscale(0%);
+            -webkit-filter: grayscale(0%);
+        }
+
+        /* При наведении на карточку проекта возвращаем цвет картинке */
+        .project-card:hover .project-preview img {
+            filter: grayscale(0%);
+            -webkit-filter: grayscale(0%);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        {% if profile %}
+        <!-- Header: Photo & Intro -->
+        <header class="header-grid">
+            <div class="photo-col">
+                {% if profile.photo_url %}
+                    <!-- ИСПРАВЛЕНО: Универсальная логика для фото профиля -->
+                    {% if profile.photo_url.startswith('http') %}
+                        <img src="{{ profile.photo_url }}" alt="Photo" class="photo">
+                    {% else %}
+                        <img src="{{ url_for('uploaded_file', filename=profile.photo_url.replace('static/', '').replace('uploads/', '')) }}" alt="Photo" class="photo">
+                    {% endif %}
+                {% else %}
+                <div style="width:100%; height:300px; background:#222; display:flex; align-items:center; justify-content:center; color:#444;">Нет фото</div>
+                {% endif %}
+            </div>
+            <div class="info-col">
+                <h1 class="name">{{ profile.full_name }}</h1>
+                <div class="intro">{{ profile.intro_text }}</div>
+
+                <div class="specialization">
+                    {% if profile.specialization %}
+                        {% for line in profile.specialization.split('\n') %}
+                        <div class="spec-item">{{ line }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+        {% endif %}
+
+        <!-- Professional Skills (Full Width Grid) -->
+        <h2>Профессиональные навыки</h2>
+        <div class="skills-grid">
+            <!-- Column 1: Design -->
+            <div class="col">
+                <h3>{{ profile.skill_title_design if profile else 'Design' }}</h3>
+                {% for skill in design_skills %}
+                <div class="skill-row">
+                    <span>{{ skill.name }}</span>
+                    <span class="skill-level"> / {{ skill.level }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Column 2: Video -->
+            <div class="col">
+                <h3>{{ profile.skill_title_video if profile else 'Video' }}</h3>
+                {% for skill in video_skills %}
+                <div class="skill-row">
+                    <span>{{ skill.name }}</span>
+                    <span class="skill-level"> / {{ skill.level }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Main Content Grid (Split Layout) -->
+        <div class="main-grid">
+
+            <!-- Left Column -->
+            <div class="left-col">
+                <div class="mb-section">
+                    <h2>Образование</h2>
+                    <div style="white-space: pre-line; color: #bbb; font-size: 16px;">{{ profile.education }}</div>
+                </div>
+
+                <div class="mb-section">
+                    <h2>{{ profile.skill_title_soft if profile else 'Soft Skills' }}</h2>
+                    <ul class="soft-list">
+                        {% for skill in soft_skills %}
+                        <li>{{ skill.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="mb-section">
+                    <h2>Контакты</h2>
+                    <div class="contacts-list">
+                        {% for c in contacts %}
+                        <div class="contact-row">
+                            <span class="contact-label">{{ c.network_name }}:</span>
+                            <a href="{{ c.link_url }}" target="_blank">{{ c.display_text }}</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="right-col">
+                <div class="mb-section">
+                    <h2>Опыт</h2>
+                    {% for job in experience %}
+                    <div class="experience-item">
+                        <div class="exp-header">{{ job.title }}</div>
+                        <div class="exp-period">{{ job.period }}</div>
+                        <ol class="exp-tasks">
+                            {% if job.description %}
+                                {% for line in job.description.split('\n') %}
+                                    {% if line.strip() %}
+                                    <li>{{ line }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ol>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div> <!-- end main-grid -->
+
+        <!-- === СЕКЦИЯ ПРОЕКТОВ (НОВОЕ) === -->
+        {% if projects %}
+        <div class="projects-section mb-section" style="margin-top: 60px;">
+            <h2>Проекты</h2>
+            <div class="projects-grid">
+                {% for project in projects %}
+                <div class="project-card">
+                    <a href="{{ url_for('main.project_detail', lang='ru', id=project.id) }}" class="project-link">
+                        <div class="project-preview">
+                            {% if project.preview_image %}
+                                <!-- ИСПОЛЬЗУЕМ НОВЫЙ РОУТ uploaded_file -->
+                                {% if project.preview_image.startswith('http') %}
+                                    <img src="{{ project.preview_image }}" alt="{{ project.title_ru }}">
+                                {% else %}
+                                    <!-- Очищаем путь от 'uploads/' и 'static/', чтобы получить чистое имя файла -->
+                                    <img src="{{ url_for('uploaded_file', filename=project.preview_image.replace('uploads/', '').replace('static/', '')) }}" alt="{{ project.title_ru }}">
+                                {% endif %}
+                            {% else %}
+                                <div class="no-image-placeholder"></div>
+                            {% endif %}
+                            <div class="project-overlay">
+                                <span>Подробнее →</span>
+                            </div>
+                        </div>
+                        <h3 class="project-title">{{ project.title_ru }}</h3>
+                        <div class="project-desc">{{ project.short_desc_ru }}</div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <!-- =============================== -->
+
+        <footer style="margin-top: 100px; margin-bottom: 40px; color: #333; font-size: 12px; text-align: center;">
+            &copy; 2025 {{ profile.full_name if profile else 'Portfolio' }}
+        </footer>
+
+    </div> <!-- end container -->
+
+</body>
+</html>

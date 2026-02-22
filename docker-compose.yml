@@ -1,0 +1,62 @@
+services:
+  stas-db:
+    image: postgres:16.6
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    command: [ "postgres", "-c", "log_statement=all" ]
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      #POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: stas
+      POSTGRES_PASSWORD: stas
+      POSTGRES_DB: stas
+    ports:
+      - "5437:5432"
+  stas-sqitch-migrate:
+    image: sqitch/sqitch:latest
+    container_name: sqitch_migrate
+    working_dir: /sqitch
+    volumes:
+      - ./sqitch:/sqitch
+      # Монтируем папку data, чтобы база сохранялась и была общей
+      - ./data:/data
+      - ./uploads:/uploads
+    # Явно указываем путь к базе внутри контейнера (/data/app.db)
+    command: [ "deploy", "--verify", "--target", "db:pg://stas:stas@stas-db:5432/stas" ]
+    restart: "no"
+
+  stas-app:
+    volumes:
+      - .:/app
+      - ./data:/data
+      - ./uploads:/uploads
+    build: .
+    depends_on:
+      stas-sqitch-migrate:
+        condition: service_completed_successfully
+    command: sh -c "
+      poetry env info
+      && poetry config installer.max-workers 10
+      && poetry install --no-interaction --no-ansi
+      && poetry run flask run -h 0.0.0.0 -p 5000 --debug --reload
+      "
+    ports:
+      - "8777:5000"
+    environment:
+      # Указываем путь к app как к модулю (так как он внутри src)
+      - FLASK_APP=app
+      # Используем абсолютный путь внутри контейнера
+      - FLASK_SETTINGS=/app/etc/settings_docker.py
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+
+volumes:
+  postgres_data:

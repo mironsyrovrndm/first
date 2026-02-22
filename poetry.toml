@@ -1,0 +1,8 @@
+[virtualenvs]
+create = true
+
+[virtualenvs.options]
+always-copy = true
+
+[keyring]
+enabled = false
