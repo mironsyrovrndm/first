@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Админка{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('admin.static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <div class="admin">
+      <aside class="admin__sidebar">
+        <h2>LUISA</h2>
+        <nav>
+          <a href="{{ url_for('admin.dashboard') }}">Обзор</a>
+          <a href="{{ url_for('admin.content') }}">Контент сайта</a>
+          <a href="{{ url_for('admin.clients') }}">Записи клиентов</a>
+        </nav>
+        <a class="sidebar__link" href="{{ url_for('main.index') }}">← На сайт</a>
+        <a class="sidebar__link" href="{{ url_for('admin.logout') }}">Выйти</a>
+      </aside>
+      <div class="admin__content">
+        <header class="admin__header">
+          <div>
+            <h1>{% block header %}Обзор{% endblock %}</h1>
+            <p class="admin__subtitle">Админ-панель психолога</p>
+          </div>
+        </header>
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+    <script src="{{ url_for('admin.static', filename='js/admin.js') }}"></script>
+  </body>
+</html>

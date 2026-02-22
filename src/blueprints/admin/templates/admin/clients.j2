@@ -1,0 +1,21 @@
+{% extends 'admin/base.j2' %}
+{% block title %}Админка — записи клиентов{% endblock %}
+{% block header %}Записи клиентов{% endblock %}
+{% block content %}
+<section class="admin__panel">
+  <div class="panel__header"><h2>Список записей</h2><span class="panel__badge">{{ records | length }} всего</span></div>
+  {% if records %}<div class="records-cards">{% for record in records %}<article class="record-card" data-record-id="{{ record.id }}"><div class="record-card__header"><div><h3>{{ record.name }}</h3><p class="record-card__meta">{{ record.date }}</p></div><div class="record-card__meta-actions"><span class="status {% if record.status == 'В работе' %}status--pending{% elif record.status == 'Завершен' %}status--danger{% else %}status--success{% endif %}">{{ record.status or "Новая" }}</span><button class="record-card__toggle" type="button" data-record-toggle aria-label="Показать детали"><span class="record-card__chevron">▾</span></button></div></div><div class="record-card__body"><div class="record-card__details"><p><strong>Прием:</strong> {{ record.date }}</p><p><strong>Телефон:</strong> {{ record.phone }}</p><p><strong>Telegram:</strong> {{ record.telegram or "—" }}</p><p><strong>Жалоба:</strong> {{ record.complaint }}</p></div><form class="record-card__actions" method="post" action="{{ url_for('admin.update_client_status') }}"><input type="hidden" name="record_id" value="{{ record.id }}" /><label>Статус<select name="status"><option value="Новая" {% if record.status == "Новая" %}selected{% endif %}>Новая</option><option value="В работе" {% if record.status == "В работе" %}selected{% endif %}>В работе</option><option value="Завершен" {% if record.status == "Завершен" %}selected{% endif %}>Завершен</option></select></label><button class="button button--ghost" type="submit">Сохранить</button></form></div></article>{% endfor %}</div>{% else %}<p class="muted">Записей пока нет.</p>{% endif %}
+</section>
+<section class="admin__panel">
+  <div class="panel__header"><h2>Добавить запись вручную</h2>{% if created %}<span class="panel__badge">Запись добавлена</span>{% else %}<span class="panel__badge">Админка</span>{% endif %}</div>
+  <form class="form-grid" method="post" action="{{ url_for('admin.add_client') }}">
+    <label>Дата приема<input type="date" name="client_date" required /></label>
+    <label>Время приема<input type="time" name="client_time" required /></label>
+    <label>ФИО<input type="text" name="client_name" placeholder="Фамилия Имя" required /></label>
+    <label>Телефон<input type="text" name="client_phone" placeholder="+7 (999) 000-00-00" required /></label>
+    <label>Telegram<input type="text" name="client_telegram" placeholder="@username" /></label>
+    <label class="span-2">Жалоба<textarea name="client_complaint" rows="3" placeholder="Краткое описание запроса" required></textarea></label>
+    <div class="form-grid__actions"><button class="button" type="submit">Добавить запись</button></div>
+  </form>
+</section>
+{% endblock %}
