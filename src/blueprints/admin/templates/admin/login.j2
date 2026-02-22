@@ -1,15 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
-<body style="font-family: sans-serif; display:flex; justify-content:center; padding-top:50px;">
-    <form method="POST" style="border:1px solid #ccc; padding:20px; border-radius:8px;">
-        <h2>Вход в админку</h2>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}<div style="color:red">{{ messages[0] }}</div>{% endif %}
-        {% endwith %}
-        <p><input type="text" name="username" placeholder="Username" required></p>
-        <p><input type="password" name="password" placeholder="Password" required></p>
-        <p><button type="submit">Войти</button></p>
-    </form>
-</body>
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Вход в админку</title>
+    <link rel="stylesheet" href="{{ url_for('admin.static', filename='css/admin.css') }}" />
+  </head>
+  <body>
+    <div class="login">
+      <form class="login__card" method="post">
+        <h1>Админка</h1>
+        <p>Введите логин и пароль администратора.</p>
+        {% if error %}<div class="login__error">{{ error }}</div>{% endif %}
+        <label>Логин<input type="text" name="username" placeholder="admin" required /></label>
+        <label>Пароль<input type="password" name="password" placeholder="admin" required /></label>
+        <button class="button" type="submit">Войти</button>
+      </form>
+    </div>
+  </body>
 </html>

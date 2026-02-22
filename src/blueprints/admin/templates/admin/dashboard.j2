@@ -1,0 +1,17 @@
+{% extends 'admin/base.j2' %}
+{% block title %}Админка — обзор{% endblock %}
+{% block header %}Обзор{% endblock %}
+{% block content %}
+<section class="admin__grid">
+  <article class="admin-card"><h3>Заявки</h3><p class="admin-card__value">{{ stats.week_total }}</p><span class="admin-card__hint">за последние 7 дней</span></article>
+  <article class="admin-card"><h3>Консультации</h3><p class="admin-card__value">{{ stats.upcoming_total }}</p><span class="admin-card__hint">предстоящие</span></article>
+  <article class="admin-card"><h3>Новые сообщения</h3><p class="admin-card__value">{{ stats.total }}</p><span class="admin-card__hint">всего записей</span></article>
+</section>
+<section class="admin__panel">
+  <div class="panel__header"><h2>Ближайшие сессии</h2><a class="panel__link" href="{{ url_for('admin.clients') }}">Все записи →</a></div>
+  <div class="admin__table">
+    <div class="admin__table-row admin__table-row--head"><span>Клиент</span><span>Дата</span><span>Статус</span></div>
+    {% if upcoming %}{% for record in upcoming %}<div class="admin__table-row"><span>{{ record.name }}</span><span>{{ record.date }}</span><span class="status {% if record.status == 'В работе' %}status--pending{% elif record.status == 'Завершен' %}status--danger{% else %}status--success{% endif %}">{{ record.status }}</span></div>{% endfor %}{% else %}<div class="admin__table-row"><span>Нет записей</span><span>—</span><span class="status status--muted">Пусто</span></div>{% endif %}
+  </div>
+</section>
+{% endblock %}

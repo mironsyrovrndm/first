@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Психолог Анна Луиза{% endblock %}</title>
+    {% block css %}<link rel="stylesheet" href="{{ url_for('main.static', filename='css/site.css') }}" />{% endblock %}
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header__inner">
+        <a class="logo" href="{{ url_for('main.index') }}">
+          <span class="logo__icon">♡</span>
+          <span>Психолог</span>
+        </a>
+        <nav class="nav">
+          <a href="{{ url_for('main.index') }}#about">Обо мне</a>
+          <a href="{{ url_for('main.index') }}#products">Продукты</a>
+          <a href="{{ url_for('main.index') }}#clients">Клиентам</a>
+          <a href="{{ url_for('main.index') }}#supervision">Супервизия</a>
+          <a href="{{ url_for('main.index') }}#speaker">Я — спикер</a>
+          <a href="{{ url_for('main.index') }}#contact">Контакты</a>
+        </nav>
+        <div class="header__actions">
+          <a class="link" href="{{ url_for('main.index') }}#contact">Написать</a>
+          <span class="header__phone">+7 999 999-99-99</span>
+        </div>
+      </div>
+    </header>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <div class="container footer__inner">
+        <div>
+          <h3>Анна Луиза</h3>
+          <p>Клиент-центрированный психотерапевт.</p>
+        </div>
+        <div>
+          <p><strong>Телефон:</strong> +7 (900) 000-00-00</p>
+          <p><strong>Почта:</strong> hello@luiza-psy.ru</p>
+          <p><strong>Telegram:</strong> @luiza_psy</p>
+        </div>
+        <div>
+          <p>© 2024 Luisa Psychology</p>
+        </div>
+      </div>
+    </footer>
+    {% block js %}<script src="{{ url_for('main.static', filename='js/site.js') }}"></script>{% endblock %}
+  </body>
+</html>
