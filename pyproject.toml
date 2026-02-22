@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "stas"
+name = "luiza"
 version = "0.1.0"
-description = "Stas site-CV"
+description = "luiza landing"
 authors = ["Miron Syrov <mironsyrovedu@gmail.com>"]
 readme = "README.md"
 packages = [
